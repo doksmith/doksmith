@@ -106,13 +106,24 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
           echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
 
-      - name: Build and Push
+      - name: Build Image
         uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.path }}
           file: ${{ matrix.path }}/Dockerfile
           platforms: ${{ steps.meta.outputs.platforms }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Publish Image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.path }}
+          file: ${{ matrix.path }}/Dockerfile
+          platforms: ${{ steps.meta.outputs.platforms }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha

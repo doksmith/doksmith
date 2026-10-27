@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-and-publish:
-    # Mencegah eksekusi/publish image di repositori template induk doksmith/doksmith
+    # Prevent build and publish execution on the template repository itself
     if: github.repository != 'doksmith/doksmith'
     uses: doksmith/.github/.github/workflows/docker-build-publish.yml@main
     with:

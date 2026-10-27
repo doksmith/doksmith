@@ -4,7 +4,7 @@ Official template repository for creating production-ready, multi-architecture D
 
 ---
 
-## 🚀 How to Create a New Container Image
+## How to Create a New Container Image
 
 1. Click the green **"Use this template"** button above to create a new repository under `@doksmith`.
 2. Follow the standard repository naming format: `docker-<app>` (e.g. `docker-redis`, `docker-wordpress`).
@@ -18,7 +18,7 @@ Official template repository for creating production-ready, multi-architecture D
 
 ---
 
-## 🛡️ Doksmith Container Standards
+## Doksmith Container Standards
 
 - **Minimal Base**: Powered by Alpine Linux.
 - **Fast Builds**: Use native pre-compiled packages (zero GCC compilation overhead).

@@ -1,0 +1,22 @@
+name: Lint Dockerfiles
+
+on:
+  push:
+    paths:
+      - 'images/**/Dockerfile'
+  pull_request:
+    paths:
+      - 'images/**/Dockerfile'
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          config: .hadolint.yaml
+          failure-threshold: error

@@ -1,0 +1,118 @@
+name: Build and Publish Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/**'
+      - 'common/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'images/**'
+  workflow_dispatch:
+    inputs:
+      target_image:
+        description: 'Specific image path to build (e.g., images/flarum/2.0 or "all")'
+        required: false
+        default: 'all'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed images
+        id: set-matrix
+        run: |
+          TARGET="${{ github.event.inputs.target_image }}"
+          
+          if [ -n "$TARGET" ] && [ "$TARGET" != "all" ]; then
+            DIRS="$TARGET"
+          elif [ "$TARGET" = "all" ]; then
+            DIRS=$(find images -mindepth 2 -maxdepth 2 -type d)
+          else
+            DIRS=$(git diff --name-only HEAD~1 HEAD | grep '^images/' | cut -d/ -f1,2,3 | sort -u || true)
+          fi
+          
+          if [ -z "$DIRS" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          python3 -c "
+          import sys, json, os
+          dirs = [d.strip() for d in '''$DIRS'''.split() if d.strip()]
+          valid_dirs = []
+          for d in dirs:
+              if os.path.isdir(d) and os.path.exists(os.path.join(d, 'Dockerfile')) and os.path.exists(os.path.join(d, 'build.json')):
+                  valid_dirs.append({'path': d, 'id': d.replace('/', '-').replace('images-', '')})
+          print('Matrix payload:', valid_dirs)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              if valid_dirs:
+                  f.write('has_changes=true\n')
+                  f.write(f'matrix={json.dumps(valid_dirs)}\n')
+              else:
+                  f.write('has_changes=false\n')
+                  f.write('matrix=[]\n')
+          "
+
+  build-and-publish:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up QEMU (Multi-Arch)
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse Metadata & Generate Tags
+        id: meta
+        run: |
+          CONFIG="${{ matrix.path }}/build.json"
+          NAME=$(jq -r '.name' "$CONFIG")
+          TAGS=$(jq -r '.tags[]' "$CONFIG" | sed "s|^|ghcr.io/${{ github.repository_owner }}/$NAME:|")
+          PLATFORMS=$(jq -r '.platforms | join(",")' "$CONFIG")
+          
+          echo "tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$TAGS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
+
+      - name: Build and Push
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.path }}
+          file: ${{ matrix.path }}/Dockerfile
+          platforms: ${{ steps.meta.outputs.platforms }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

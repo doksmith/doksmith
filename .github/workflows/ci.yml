@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-publish:
+    # Mencegah eksekusi/publish image di repositori template induk doksmith/doksmith
+    if: github.repository != 'doksmith/doksmith'
+    uses: doksmith/.github/.github/workflows/docker-build-publish.yml@main
+    with:
+      target_versions: '["1.0"]'
+    secrets: inherit

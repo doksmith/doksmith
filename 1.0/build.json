@@ -1,0 +1,21 @@
+{
+  "name": "myapp",
+  "version": "1.0.0",
+  "platforms": [
+    "linux/amd64",
+    "linux/arm64"
+  ],
+  "tags": [
+    "1.0.0",
+    "1.0",
+    "1",
+    "latest"
+  ],
+  "labels": {
+    "org.opencontainers.image.title": "Myapp",
+    "org.opencontainers.image.description": "Docker container for Myapp",
+    "org.opencontainers.image.source": "https://github.com/doksmith/docker-myapp",
+    "org.opencontainers.image.documentation": "https://github.com/doksmith/docker-myapp#readme",
+    "org.opencontainers.image.vendor": "doksmith"
+  }
+}

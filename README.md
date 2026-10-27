@@ -1,75 +1,26 @@
-# Doksmith Container Images (`doksmith`)
+# Doksmith Image Template (`doksmith/doksmith`)
 
-Production-ready, multi-architecture (`linux/amd64`, `linux/arm64`) container images maintained by [doksmith](https://github.com/doksmith).
-
-## Architecture & Features
-
-- **Multi-Architecture**: Built natively for `linux/amd64` and `linux/arm64` via Docker Buildx & QEMU.
-- **Fast Builds (Zero Compilation Overhead)**: Leveraging Alpine Linux native pre-compiled binaries to ensure multi-arch builds finish in under 1 minute.
-- **CVE Mitigated**: Strict adherence to security patches, using PHP 8.3 LTS to eliminate PHP 8.2 end-of-life and PHP2Shell vulnerabilities.
-- **Change Detection CI/CD**: Automatic matrix builds triggered only for image directories with changes.
-- **Security-First**: Minimal base images (Alpine Linux), non-root execution where applicable, and automated vulnerability scanning.
-- **Registry**: Automatically published to GitHub Container Registry (`ghcr.io/doksmith/<image>:<tag>`).
+Official template repository for creating production-ready, multi-architecture Docker container images for the [Doksmith](https://github.com/doksmith) community.
 
 ---
 
-## Directory Layout
+## 🚀 How to Create a New Container Image
 
-```text
-doksmith/
-├── .github/
-│   └── workflows/
-│       ├── build-and-publish.yml   # Build and push to GHCR on change
-│       └── lint-dockerfiles.yml    # Hadolint Dockerfile linting
-├── common/                         # Shared scripts, entrypoints, and configurations
-├── images/                         # Catalog of container images
-│   └── flarum/
-│       ├── 1.8/                    # Flarum 1.x LTS series (v1.8.21)
-│       │   ├── Dockerfile
-│       │   ├── build.json
-│       │   └── rootfs/
-│       └── 2.0/                    # Flarum 2.x Latest series (v2.0.2)
-│           ├── Dockerfile
-│           ├── build.json
-│           └── rootfs/
-├── tools/                          # Helper scripts for development
-├── docker-bake.hcl                 # Buildx bake definition
-└── README.md
-```
+1. Click the green **"Use this template"** button above to create a new repository under `@doksmith`.
+2. Follow the standard repository naming format: `docker-<app>` (e.g. `docker-redis`, `docker-wordpress`).
+3. Use the helper script to scaffold a new image version:
+   ```bash
+   ./tools/new-image.sh <image-name> <version>
+   # Example: ./tools/new-image.sh redis 7.2
+   ```
+4. Define your `Dockerfile`, `build.json`, and filesystem overlays in `rootfs/`.
+5. The repository uses the shared organization workflow from `doksmith/.github` for automated multi-arch building (`linux/amd64`, `linux/arm64`) and publishing to GitHub Container Registry (`ghcr.io/doksmith/<image>`).
 
 ---
 
-## Catalog
+## 🛡️ Doksmith Container Standards
 
-| Image | Version | Platforms | Registry | Description |
-|---|---|---|---|---|
-| **Flarum 2.x** | `2.0.2`, `2.0`, `2`, `latest` | `amd64`, `arm64` | `ghcr.io/doksmith/flarum` | Fast, modern open-source forum software (Latest Stable) |
-| **Flarum 1.x** | `1.8.21`, `1.8`, `1` | `amd64`, `arm64` | `ghcr.io/doksmith/flarum` | Legacy forum software series (LTS / Maintenance) |
-
----
-
-## Local Development
-
-### Build an Image Locally
-
-```bash
-# Build Flarum 2.x
-docker buildx build \
-  --platform linux/amd64 \
-  -t ghcr.io/doksmith/flarum:2.0.2 \
-  -f images/flarum/2.0/Dockerfile \
-  images/flarum/2.0/
-
-# Build Flarum 1.x LTS
-docker buildx build \
-  --platform linux/amd64 \
-  -t ghcr.io/doksmith/flarum:1.8.21 \
-  -f images/flarum/1.8/Dockerfile \
-  images/flarum/1.8/
-```
-
-### Adding a New Image
-
-1. Run `./tools/new-image.sh <app-name> <version>`.
-2. Populate `Dockerfile`, `build.json`, and supporting files (`rootfs/`).
-3. Commit and push to `main` branch. The CI pipeline will automatically test, build, and publish the image to `ghcr.io/doksmith/<app-name>`.
+- **Minimal Base**: Powered by Alpine Linux.
+- **Fast Builds**: Use native pre-compiled packages (zero GCC compilation overhead).
+- **Security-First**: CVE mitigated runtimes (PHP 8.3 LTS, non-root execution where applicable).
+- **Independent Repositories**: Modular `docker-<app>` repositories ensure isolated issue tracking and dedicated documentation per container.

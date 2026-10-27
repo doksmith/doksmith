@@ -1,0 +1,12 @@
+services:
+  myapp:
+    image: ghcr.io/doksmith/myapp:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=UTC
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./data:/data

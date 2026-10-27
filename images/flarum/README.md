@@ -1,6 +1,6 @@
 # Flarum Container Image
 
-Container image for [Flarum](https://flarum.org), built on top of PHP 8.3-FPM Alpine with Nginx and Supervisor.
+Production-ready, multi-architecture container image for [Flarum](https://flarum.org), built on top of Alpine 3.20 Linux with pre-compiled PHP 8.3, Nginx, and Supervisor. Maintained by [doksmith](https://github.com/doksmith).
 
 ## Supported Tags
 
@@ -11,7 +11,7 @@ Container image for [Flarum](https://flarum.org), built on top of PHP 8.3-FPM Al
 ```yaml
 services:
   flarum:
-    image: ghcr.io/dyzulk-lab/flarum:2.0.2
+    image: ghcr.io/doksmith/flarum:2.0.2
     restart: always
     ports:
       - "8000:8000"

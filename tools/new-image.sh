@@ -32,8 +32,8 @@ cat <<EOF > "$TARGET_DIR/build.json"
   ],
   "labels": {
     "org.opencontainers.image.title": "${IMAGE_NAME^}",
-    "org.opencontainers.image.source": "https://github.com/dyzulk-lab/docker-images",
-    "org.opencontainers.image.vendor": "dyzulk-lab"
+    "org.opencontainers.image.source": "https://github.com/doksmith/doksmith",
+    "org.opencontainers.image.vendor": "doksmith"
   }
 }
 EOF
@@ -41,9 +41,9 @@ EOF
 cat <<EOF > "$TARGET_DIR/Dockerfile"
 FROM alpine:3.20
 
-LABEL maintainer="dyzulk <https://github.com/dyzulk>"
+LABEL maintainer="doksmith <https://github.com/doksmith>"
 LABEL org.opencontainers.image.title="${IMAGE_NAME^}"
-LABEL org.opencontainers.image.source="https://github.com/dyzulk-lab/docker-images"
+LABEL org.opencontainers.image.source="https://github.com/doksmith/doksmith"
 
 RUN apk add --no-cache bash curl
 

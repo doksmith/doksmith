@@ -14,9 +14,9 @@
   "labels": {
     "org.opencontainers.image.title": "Flarum",
     "org.opencontainers.image.description": "Simple, fast, and modern open-source forum software packaged for Docker",
-    "org.opencontainers.image.source": "https://github.com/dyzulk-lab/docker-images",
+    "org.opencontainers.image.source": "https://github.com/doksmith/doksmith",
     "org.opencontainers.image.url": "https://flarum.org",
-    "org.opencontainers.image.vendor": "dyzulk-lab",
+    "org.opencontainers.image.vendor": "doksmith",
     "org.opencontainers.image.licenses": "MIT"
   }
 }
